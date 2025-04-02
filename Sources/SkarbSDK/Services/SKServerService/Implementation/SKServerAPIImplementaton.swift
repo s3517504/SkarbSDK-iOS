@@ -217,7 +217,8 @@ class SKServerAPIImplementaton: SKServerAPI {
       switch result {
         case .success(let verifyReceiptResponse):
           DispatchQueue.main.async {
-            completion(.success(SKUserPurchaseInfo(verifyReceiptResponse: verifyReceiptResponse)))
+            let userPurchaseInfo = SKUserPurchaseInfo(verifyReceiptResponse: verifyReceiptResponse)
+            completion(.success(userPurchaseInfo))
           }
         case .failure(let error):
           let message = (error as? GRPCStatus)?.message ?? error.localizedDescription

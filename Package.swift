@@ -6,7 +6,7 @@ import PackageDescription
 let package = Package(
   name: "SkarbSDK",
   platforms: [
-    .iOS("11.3"),
+    .iOS("15.0"),
   ],
   products: [
     .library(

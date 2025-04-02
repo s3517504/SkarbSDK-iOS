@@ -17,23 +17,26 @@ class SKUserDefaultsService {
     case appgateComands
     case oldSchemaVersion
     case deviceId
-    
+    case transactions
+
     var keyName: String {
       switch self {
-        case .initData:
-          return "sk_init_data_key"
-        case .brokerData:
-          return "sk_broker_data_key"
-        case .testData:
-          return "sk_test_data_key"
-        case .purchaseData:
-          return "sk_purchase_data"
-        case .appgateComands:
-          return "sk_appgate_commands"
-        case .oldSchemaVersion:
-          return "sk_old_schema_version"
-        case .deviceId:
-          return "sk_device_id_key"
+      case .initData:
+        return "sk_init_data_key"
+      case .brokerData:
+        return "sk_broker_data_key"
+      case .testData:
+        return "sk_test_data_key"
+      case .purchaseData:
+        return "sk_purchase_data"
+      case .appgateComands:
+        return "sk_appgate_commands"
+      case .oldSchemaVersion:
+        return "sk_old_schema_version"
+      case .deviceId:
+        return "sk_device_id_key"
+      case .transactions:
+        return "transactions_key"
       }
     }
   }
@@ -49,6 +52,24 @@ class SKUserDefaultsService {
   
   func setValue(_ value: Any?, forKey key: SKKey) {
     self.userDefaults.set(value, forKey: key.keyName)
+  }
+  
+  func codableSet<T: Codable & Hashable>(forKey key: SKKey) -> Set<T> {
+      guard let data = self.userDefaults.data(forKey: key.keyName) else { return [] }
+      return (try? JSONDecoder().decode(Set<T>.self, from: data)) ?? []
+  }
+
+  func insertItemToCodableSet<T: Codable & Hashable>(forKey key: SKKey, item: T) {
+      var set: Set<T> = codableSet(forKey: key)
+      set.insert(item)
+      setCodableSet(forKey: key, set: set)
+  }
+
+  func setCodableSet<T: Codable & Hashable>(forKey key: SKKey, set: Set<T>) {
+      let encoder = JSONEncoder()
+      if let data = try? encoder.encode(set) {
+          self.userDefaults.setValue(data, forKey: key.keyName)
+      }
   }
   
   func bool(forKey key: SKKey) -> Bool {

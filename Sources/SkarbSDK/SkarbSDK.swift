@@ -119,6 +119,18 @@ public class SkarbSDK {
       return
     }
     
+    Task {
+      for await i in Transaction.all {
+        switch i {
+        case .unverified(let transaction, let error):
+          print("[Purchase] - Unferified \(transaction.originalID), error: \(error)")
+        case .verified(let transaction):
+          print("[Purchase] - Verify \(transaction.id) - product: \(transaction.productID), expiration: \(transaction.expirationDate)")
+        }
+        let allTransactions: Set<SKTransaction> = SKServiceRegistry.userDefaultsService.codableSet(forKey: .transactions)
+        print("[Purchase] - Stored: \(allTransactions.map({ $0.transactionId })), hashes: \(allTransactions.map({ $0.hashValue }))")
+      }
+    }
     SKServiceRegistry.serverAPI.verifyReceipt(completion: { result in
       switch result {
         case .success(let updatedUserPurchaseInfo):

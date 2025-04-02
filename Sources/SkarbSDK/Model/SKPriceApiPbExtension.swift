@@ -74,25 +74,25 @@ extension Priceapi_PricesRequest: SKCodableStruct {
 
 extension Priceapi_Product: SKCodableStruct {
   
-  init(product: SKProduct, transactionDate: Date?, transactionId: String?) {
-    productID = product.productIdentifier
+  init(product: Product, transactionDate: Date?, transactionId: String?) {
+    productID = product.id
     if #available(iOS 12.0, *) {
-      groupID = product.subscriptionGroupIdentifier ?? ""
+      groupID = product.subscription?.subscriptionGroupID ?? ""
     } else {
       groupID = ""
     }
     
-    if let subscriptionPeriod = product.subscriptionPeriod {
+    if let subscriptionPeriod = product.subscription?.subscriptionPeriod {
       period = Priceapi_Period(productPeriod: subscriptionPeriod)
     }
-    price = product.price.doubleValue
-    if let introductoryPrice = product.introductoryPrice {
-      intro = Priceapi_Discount(discount: introductoryPrice)
+    price = NSDecimalNumber(decimal: product.price).doubleValue
+    if let subscription = product.subscription, let introOffer = subscription.introductoryOffer {
+      intro = Priceapi_Discount(discount: introOffer)
     }
-    if #available(iOS 12.2, *) {
-      discounts = product.discounts.map({ Priceapi_Discount(discount: $0) })
+    if let subscription = product.subscription {
+      discounts = subscription.promotionalOffers.map { Priceapi_Discount(discount: $0) }
     } else {
-      discounts = []
+        discounts = []
     }
     if let transactionDate = transactionDate {
       tranDate = SwiftProtobuf.Google_Protobuf_Timestamp(date: transactionDate)
@@ -164,9 +164,9 @@ extension Priceapi_Product: SKCodableStruct {
 
 extension Priceapi_Period: SKCodableStruct {
   
-  init(productPeriod: SKProductSubscriptionPeriod) {
-    unit = "\(productPeriod.unit.rawValue)"
-    count = Int32(productPeriod.numberOfUnits)
+  init(productPeriod: Product.SubscriptionPeriod) {
+    unit = "\(productPeriod.unit)"
+    count = Int32(productPeriod.value)
   }
   
   init(from decoder: Swift.Decoder) throws {
@@ -203,19 +203,19 @@ extension Priceapi_Period: SKCodableStruct {
 
 extension Priceapi_Discount: SKCodableStruct {
   
-  init(discount: SKProductDiscount) {
-    price = discount.price.doubleValue
+  init(discount: Product.SubscriptionOffer) {
+    price = NSDecimalNumber(decimal: discount.price).doubleValue
     if #available(iOS 12.2, *) {
-      discountID = discount.identifier ?? ""
-      type = Int32(discount.type.rawValue)
+      discountID = discount.id ?? ""
+      type = Int32(discount.type.rawValue) ?? 0
     } else {
       discountID = ""
       type = 0
     }
     
-    mode = Int32(discount.paymentMode.rawValue)
-    period = Priceapi_Period(productPeriod: discount.subscriptionPeriod)
-    periodCount = Int32(discount.numberOfPeriods)
+    mode = Int32(discount.paymentMode.rawValue) ?? 0
+    period = Priceapi_Period(productPeriod: discount.period)
+    periodCount = Int32(discount.periodCount)
   }
   
   init(from decoder: Swift.Decoder) throws {

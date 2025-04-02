@@ -19,6 +19,6 @@ class SKServiceRegistry {
   
   static func initialize(isObservable: Bool) {
     _ = syncService
-    storeKitService = SKStoreKitServiceImplementation(isObservable: isObservable)
+    storeKitService = SKStoreKit2ServiceImp()
   }
 }

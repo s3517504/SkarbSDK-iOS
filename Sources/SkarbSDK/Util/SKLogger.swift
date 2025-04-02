@@ -88,6 +88,12 @@ class SKLogger {
     }
   }
   
+  static func logPurchase(_ message: String) {
+    if SkarbSDK.isLoggingEnabled {
+      print("\(Formatter.milliSec.string(from: Date())) [SkarbSDK-\(SkarbSDK.version)] [Purchase] \(message)")
+    }
+  }
+  
   static func logNetwork(_ message: String) {
     if SkarbSDK.isLoggingEnabled {
       print("\(Formatter.milliSec.string(from: Date())) [SkarbSDK-\(SkarbSDK.version)] [NETWORK] \(message)")

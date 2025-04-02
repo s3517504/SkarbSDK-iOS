@@ -33,9 +33,9 @@ public struct SKOfferPackage {
   public let description: String
   public let productId: String
   public let purchaseType: PurchaseType
-  public let storeProduct: SKProduct
+  public let storeProduct: Product
   
-  init(package: Setupsapi_Package, storeProduct: SKProduct) {
+  init(package: Setupsapi_Package, storeProduct: Product) {
     self.id = package.id
     self.description = package.description_p
     self.productId = package.productID
@@ -44,22 +44,22 @@ public struct SKOfferPackage {
   }
   
   public var isTrial: Bool {
-    guard let intro = storeProduct.introductoryPrice else {
+    guard let intro = storeProduct.subscription?.introductoryOffer else {
       return false
     }
-    return intro.paymentMode == SKProductDiscount.PaymentMode.freeTrial
+    return intro.paymentMode == .freeTrial
   }
   
   public var isSubscription: Bool {
-    return storeProduct.subscriptionPeriod != nil
+    return storeProduct.subscription?.subscriptionPeriod != nil
   }
   
-  public var period: SKProduct.PeriodUnit? {
-    return storeProduct.subscriptionPeriod?.unit
+  public var period: Product.SubscriptionPeriod.Unit? {
+    return storeProduct.subscription?.subscriptionPeriod.unit
   }
   
   public var numberOfUnits: Int? {
-    return storeProduct.subscriptionPeriod?.numberOfUnits
+    return storeProduct.subscription?.subscriptionPeriod.value
   }
   
   public var price: Decimal {
@@ -67,23 +67,23 @@ public struct SKOfferPackage {
   }
   
   public var currencyCode: String? {
-    return storeProduct.priceLocale.currencyCode
+    return storeProduct.priceFormatStyle.currencyCode
   }
   
   public var localizedPriceString: String {
-    return priceAsString(locale: storeProduct.priceLocale,
-                         price: storeProduct.price) ?? ""
+    return priceAsString(locale: storeProduct.priceFormatStyle.locale,
+                         price: NSDecimalNumber(decimal: storeProduct.price)) ?? ""
   }
   
   public var localizedIntroductoryPriceString: String? {
-      guard #available(iOS 12.2, *),
-            let intro = storeProduct.introductoryPrice
-      else {
-          return nil
-      }
-
-    return priceAsString(locale: intro.priceLocale,
-                         price: intro.price)
+    guard
+      let intro = storeProduct.subscription?.introductoryOffer
+    else {
+      return nil
+    }
+    
+    return priceAsString(locale: storeProduct.priceFormatStyle.locale,
+                         price: NSDecimalNumber(decimal: intro.price))
   }
   
   public var monthlyLocalizedPriceString: String? {
@@ -108,7 +108,7 @@ public struct SKOfferPackage {
       .dividing(by: periodsPerMonth as NSDecimalNumber,
                 withBehavior: Self.roundingBehavior) as Decimal
     
-    return priceAsString(locale: storeProduct.priceLocale,
+    return priceAsString(locale: storeProduct.priceFormatStyle.locale,
                          price: NSDecimalNumber(decimal: price))
   }
   
@@ -134,7 +134,7 @@ public struct SKOfferPackage {
       .dividing(by: periodsPerWeek as NSDecimalNumber,
                 withBehavior: Self.roundingBehavior) as Decimal
     
-    return priceAsString(locale: storeProduct.priceLocale,
+    return priceAsString(locale: storeProduct.priceFormatStyle.locale,
                          price: NSDecimalNumber(decimal: price))
   }
   
@@ -160,13 +160,13 @@ public struct SKOfferPackage {
       .dividing(by: periodsPerDay as NSDecimalNumber,
                 withBehavior: Self.roundingBehavior) as Decimal
     
-    return priceAsString(locale: storeProduct.priceLocale,
+    return priceAsString(locale: storeProduct.priceFormatStyle.locale,
                          price: NSDecimalNumber(decimal: price))
   }
   
   public func localizedPriceWithMultiplier(_ multiplier: Double) -> String {
-    return priceAsString(locale: storeProduct.priceLocale,
-                         price: NSDecimalNumber(value: storeProduct.price.doubleValue * multiplier)) ?? ""
+    return priceAsString(locale: storeProduct.priceFormatStyle.locale,
+                         price: NSDecimalNumber(value: NSDecimalNumber(decimal: storeProduct.price).doubleValue  * multiplier)) ?? ""
   }
 
   // MARK: Private
