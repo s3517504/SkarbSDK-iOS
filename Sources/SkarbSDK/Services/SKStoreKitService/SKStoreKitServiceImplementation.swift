@@ -130,7 +130,9 @@ extension SKStoreKitServiceImplementation: SKPaymentTransactionObserver {
       delegate?.storeKitUpdatedTransaction(transaction)
       switch transaction.transactionState {
         case .purchased:
+        if restorePurchasingCompletion == nil {
           purchasedTransactions.append(transaction)
+        }
         case .failed:
           failed(transaction)
         case .restored:
@@ -140,7 +142,9 @@ extension SKStoreKitServiceImplementation: SKPaymentTransactionObserver {
       }
     }
     
-    purchased(purchasedTransactions)
+    DispatchQueue.global().async { [transactions] in
+      self.purchased(purchasedTransactions)
+    }
   }
   
   /// Sent when all transactions from the user's purchase history have successfully been added back to the queue.
