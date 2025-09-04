@@ -76,6 +76,40 @@ public struct SKOfferPackage {
     isTrial ? storeProduct.introductoryPrice?.subscriptionPeriod.numberOfUnits : nil
   }
   
+  public var trialExpirationDateFromToday: Date? {
+    guard isTrial,
+    let discountPeriodDuration = discountPeriodDuration,
+          let discountPeriod = discountPeriod else {
+      return nil
+    }
+    
+    let days: Int
+    switch discountPeriod {
+    case .day:
+      days = 1
+    case .week:
+      days = 7
+    case .month:
+      days = 30
+    case .year:
+      days = 365
+    @unknown default:
+      days = 0
+    }
+    
+    let calendar = Calendar.current
+    let today = Date()
+    guard let trialExpDate = calendar.date(
+      byAdding: .day,
+      value: days * discountPeriodDuration,
+      to: today
+    ) else {
+      return nil
+    }
+    
+    return trialExpDate
+  }
+  
   public var discountPeriodDuration: Int? {
     storeProduct.introductoryPrice?.subscriptionPeriod.numberOfUnits
   }
