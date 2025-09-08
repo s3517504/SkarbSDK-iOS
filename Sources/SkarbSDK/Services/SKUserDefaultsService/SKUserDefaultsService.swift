@@ -17,23 +17,29 @@ class SKUserDefaultsService {
     case appgateComands
     case oldSchemaVersion
     case deviceId
+    case userPurchasedInfo
+    case userPurchasedInfoCacheDate
     
     var keyName: String {
       switch self {
-        case .initData:
-          return "sk_init_data_key"
-        case .brokerData:
-          return "sk_broker_data_key"
-        case .testData:
-          return "sk_test_data_key"
-        case .purchaseData:
-          return "sk_purchase_data"
-        case .appgateComands:
-          return "sk_appgate_commands"
-        case .oldSchemaVersion:
-          return "sk_old_schema_version"
-        case .deviceId:
-          return "sk_device_id_key"
+      case .initData:
+        return "sk_init_data_key"
+      case .brokerData:
+        return "sk_broker_data_key"
+      case .testData:
+        return "sk_test_data_key"
+      case .purchaseData:
+        return "sk_purchase_data"
+      case .appgateComands:
+        return "sk_appgate_commands"
+      case .oldSchemaVersion:
+        return "sk_old_schema_version"
+      case .deviceId:
+        return "sk_device_id_key"
+      case .userPurchasedInfo:
+        return "sk_user_purchased_info"
+      case .userPurchasedInfoCacheDate:
+        return "sk_user_purchased_info_cache_date"
       }
     }
   }
@@ -73,6 +79,13 @@ class SKUserDefaultsService {
   
   func data(forKey key: SKKey) -> Data? {
     return self.userDefaults.object(forKey: key.keyName) as? Data
+  }
+  
+  func setCodable<T: Encodable>(object: T, forKey key: SKKey) {
+    let encoder = JSONEncoder()
+    if let encoded = try? encoder.encode(object) {
+      setValue(encoded, forKey: key)
+    }
   }
   
   func codable<T: Decodable>(forKey key: SKKey, objectType: T.Type) -> T? {

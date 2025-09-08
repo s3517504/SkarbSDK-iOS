@@ -9,7 +9,7 @@ import Foundation
 import SwiftProtobuf
 
 
-public struct SKUserPurchaseInfo {
+public struct SKUserPurchaseInfo: Codable {
   public var environment: String
   public var purchasedSubscriptions: [SKPurchasedSubscription] = []
   public var onetimePurchases: [SKOnetimePurchase] = []
@@ -37,7 +37,7 @@ public struct SKUserPurchaseInfo {
 }
 
 
-public struct SKPurchasedSubscription {
+public struct SKPurchasedSubscription: Codable {
   public let transactionID: String
   public let originalTransactionID: String
   public let expiryDate: Date
@@ -92,7 +92,7 @@ public struct SKPurchasedSubscription {
 }
 
 
-public struct SKOnetimePurchase {
+public struct SKOnetimePurchase: Codable {
   public let transactionID: String
   public let purchaseDate: Date
   public let productID: String
