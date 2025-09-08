@@ -130,7 +130,7 @@ public class SkarbSDK {
     SKServiceRegistry.serverAPI.verifyReceipt(completion: { result in
       switch result {
       case .success(let updatedUserPurchaseInfo):
-        SKServiceRegistry.userDefaultsService.setValue(updatedUserPurchaseInfo, forKey: .userPurchasedInfo)
+        SKServiceRegistry.userDefaultsService.setCodable(object: updatedUserPurchaseInfo, forKey: .userPurchasedInfo)
         SKServiceRegistry.userDefaultsService.setValue(Date(), forKey: .userPurchasedInfoCacheDate)
         completion(.success(updatedUserPurchaseInfo))
       case .failure(let error):
