@@ -107,7 +107,7 @@ public class SkarbSDK {
                                      retryAttempt: Int = 0,
                                      maxRetryAttempts: Int = 0,
                                      completion: @escaping (Result<SKUserPurchaseInfo, Error>) -> Void) {
-    let userPurchasedInfoCacheDate = SKServiceRegistry.userDefaultsService.codable(forKey: .userPurchasedInfoCacheDate, objectType: Date.self)
+    let userPurchasedInfoCacheDate = SKServiceRegistry.userDefaultsService.date(forKey: .userPurchasedInfoCacheDate)
     var components = DateComponents()
     components.day = 6
     

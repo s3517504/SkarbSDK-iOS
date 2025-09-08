@@ -81,6 +81,10 @@ class SKUserDefaultsService {
     return self.userDefaults.object(forKey: key.keyName) as? Data
   }
   
+  func date(forKey key: SKKey) -> Date? {
+    return self.userDefaults.object(forKey: key.keyName) as? Date
+  }
+  
   func setCodable<T: Encodable>(object: T, forKey key: SKKey) {
     let encoder = JSONEncoder()
     if let encoded = try? encoder.encode(object) {
