@@ -21,11 +21,7 @@ public class SkarbSDK {
   static let version: String = "0.6.23"
   
   static var clientId: String = ""
-  
-//  TODO: Separate manager?
-//  Callback main thread?
-  static var cachedUserPurchaseInfo: SKUserPurchaseInfo? = nil
-  
+    
   public static func initialize(clientId: String,
                                 isObservable: Bool,
                                 deviceId: String? = nil) {
@@ -111,8 +107,20 @@ public class SkarbSDK {
                                      retryAttempt: Int = 0,
                                      maxRetryAttempts: Int = 0,
                                      completion: @escaping (Result<SKUserPurchaseInfo, Error>) -> Void) {
+    let userPurchasedInfoCacheDate = SKServiceRegistry.userDefaultsService.codable(forKey: .userPurchasedInfoCacheDate, objectType: Date.self)
+    var components = DateComponents()
+    components.day = 6
+    
+    var isCacheExpired: Bool = true
+    if let userPurchasedInfoCacheDate = userPurchasedInfoCacheDate,
+       let newExpCacheDate = Calendar.current.date(byAdding: components, to: userPurchasedInfoCacheDate) {
+      isCacheExpired = Date() >= newExpCacheDate
+    }
+    
     if refreshPolicy == .memoryCached,
-       let userPurchaseInfo = cachedUserPurchaseInfo {
+       let userPurchaseInfo = SKServiceRegistry.userDefaultsService.codable(forKey: .userPurchasedInfo, objectType: SKUserPurchaseInfo.self),
+       (userPurchasedInfoCacheDate != nil),
+       !isCacheExpired {
       DispatchQueue.main.async {
         completion(.success(userPurchaseInfo))
       }
@@ -121,10 +129,11 @@ public class SkarbSDK {
     
     SKServiceRegistry.serverAPI.verifyReceipt(completion: { result in
       switch result {
-        case .success(let updatedUserPurchaseInfo):
-          cachedUserPurchaseInfo = updatedUserPurchaseInfo
-          completion(.success(updatedUserPurchaseInfo))
-        case .failure(let error):
+      case .success(let updatedUserPurchaseInfo):
+        SKServiceRegistry.userDefaultsService.setValue(updatedUserPurchaseInfo, forKey: .userPurchasedInfo)
+        SKServiceRegistry.userDefaultsService.setValue(Date(), forKey: .userPurchasedInfoCacheDate)
+        completion(.success(updatedUserPurchaseInfo))
+      case .failure(let error):
         if retryAttempt < maxRetryAttempts {
           // retry
           let delay = Double(retryAttempt) * 0.15
