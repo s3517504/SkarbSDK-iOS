@@ -18,7 +18,7 @@ public class SkarbSDK {
   
 //  MARK: Private
   static let agentName: String = "SkarbSDK-iOS"
-  static let version: String = "0.6.23"
+  static let version: String = "0.6.24"
   
   static var clientId: String = ""
     
@@ -157,7 +157,13 @@ public class SkarbSDK {
     SKServiceRegistry.offeringsManager.getOfferings(with: refreshPolicy,
                                                     completion: completion)
   }
-  
+
+  /// Synchronously checks whether offerings are already cached in memory.
+  /// Does not trigger a network fetch. Can be called on any thread.
+  public static func isOfferingsAvailable() -> Bool {
+    return SKServiceRegistry.offeringsManager.isOfferingsAvailable()
+  }
+
   //    MARK: Purchasing flow
   /// Restore all purchases
   /// Should be called on the main thread. Callback will be on the main thread
