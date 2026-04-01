@@ -10,6 +10,7 @@ import Foundation
 protocol SKOfferingsManager {
   func getOfferings(with refreshPolicy: SKRefreshPolicy,
                     completion: @escaping (Result<SKOfferings, Error>) -> Void)
+  func isOfferingsAvailable() -> Bool
 }
 
 class SKOfferingsManagerImplementation: SKOfferingsManager {
@@ -24,6 +25,11 @@ class SKOfferingsManagerImplementation: SKOfferingsManager {
     
     return offerings
   }
+  
+  func isOfferingsAvailable() -> Bool {
+    return offerings != nil
+  }
+
   func getOfferings(with refreshPolicy: SKRefreshPolicy,
                     completion: @escaping (Result<SKOfferings, Error>) -> Void) {
     if refreshPolicy == .memoryCached,
