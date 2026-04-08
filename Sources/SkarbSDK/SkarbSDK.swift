@@ -10,6 +10,10 @@ import Foundation
 import UIKit
 import StoreKit
 
+public extension Notification.Name {
+  static let skarbUserPurchaseInfoDidUpdate = Notification.Name("skarbUserPurchaseInfoDidUpdate")
+}
+
 public class SkarbSDK {
   
 //  MARK: Public
@@ -132,6 +136,7 @@ public class SkarbSDK {
       case .success(let updatedUserPurchaseInfo):
         SKServiceRegistry.userDefaultsService.setCodable(object: updatedUserPurchaseInfo, forKey: .userPurchasedInfo)
         SKServiceRegistry.userDefaultsService.setValue(Date(), forKey: .userPurchasedInfoCacheDate)
+        NotificationCenter.default.post(name: .skarbUserPurchaseInfoDidUpdate, object: nil)
         completion(.success(updatedUserPurchaseInfo))
       case .failure(let error):
         if retryAttempt < maxRetryAttempts {
@@ -162,6 +167,13 @@ public class SkarbSDK {
   /// Does not trigger a network fetch. Can be called on any thread.
   public static func isOfferingsAvailable() -> Bool {
     return SKServiceRegistry.offeringsManager.isOfferingsAvailable()
+  }
+
+  public static func getCachedUserPurchaseInfoIfAvailable() -> SKUserPurchaseInfo? {
+    return SKServiceRegistry.userDefaultsService.codable(
+      forKey: .userPurchasedInfo,
+      objectType: SKUserPurchaseInfo.self
+    )
   }
 
   //    MARK: Purchasing flow
